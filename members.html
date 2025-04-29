@@ -3,44 +3,78 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Members - Pen Socialist Republic</title>
+  <title>Members - The Pen Socialist Republic</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <h1>📜 Members of the Republic</h1>
-  <p>These are the comrades who have joined our cause.</p>
-
-  <ul id="member-list"></ul>
+  <h1>📜 Pen Members</h1>
+  <div id="members-list">Loading members...</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
       authDomain: "pen-socialist-republic.firebaseapp.com",
       projectId: "pen-socialist-republic",
+      storageBucket: "pen-socialist-republic.firebasestorage.app",
+      messagingSenderId: "750292729446",
+      appId: "1:750292729446:web:03b1ca4355c4b0b16737a7",
+      measurementId: "G-3QMLT1900F"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    const membersRef = collection(db, "members");
+    const membersList = document.getElementById("members-list");
 
-    async function loadMembers() {
-      const snapshot = await getDocs(membersRef);
-      const list = document.getElementById("member-list");
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        membersList.innerHTML = "Please log in first.";
+        return;
+      }
 
-      snapshot.forEach(doc => {
-        const li = document.createElement("li");
-        li.textContent = doc.data().penName;
-        list.appendChild(li);
+      // Check if the user has already entered a pen name from localStorage
+      const penName = localStorage.getItem("userPenName");
+      if (!penName) {
+        membersList.innerHTML = "Please enter a pen name first.";
+        return;
+      }
+
+      // Check if user is admin (Aahil Jawad)
+      const isAdmin = user.displayName === "Aahil Jawad";
+
+      // Fetch members from Firestore
+      const snapshot = await getDocs(collection(db, "members"));
+      if (snapshot.empty) {
+        membersList.innerHTML = "No members found.";
+        return;
+      }
+
+      membersList.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.penName}</strong> (${data.displayName})`;
+
+        if (isAdmin) {
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "❌ Remove";
+          deleteBtn.style.marginLeft = "10px";
+          deleteBtn.onclick = async () => {
+            await deleteDoc(doc(db, "members", docSnap.id));
+            alert(`${data.penName} removed.`);
+            location.reload(); // Refresh after deleting
+          };
+          div.appendChild(deleteBtn);
+        }
+
+        membersList.appendChild(div);
       });
-    }
-
-    loadMembers();
+    });
   </script>
-
 </body>
 </html>
