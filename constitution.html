@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Constitution - Pen Socialist Republic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>📘 The Constitution</h1>
+  <textarea id="constitution" rows="10" cols="50" placeholder="Write the glorious law here..."></textarea><br>
+  <button onclick="saveConstitution()">Save</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
+      authDomain: "pen-socialist-republic.firebaseapp.com",
+      projectId: "pen-socialist-republic",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const constitutionRef = doc(db, "pen-socialist-republic", "constitution");
+    const textarea = document.getElementById("constitution");
+
+    async function loadConstitution() {
+      const snap = await getDoc(constitutionRef);
+      if (snap.exists()) {
+        textarea.value = snap.data().text || "";
+      }
+    }
+
+    async function saveConstitution() {
+      const user = auth.currentUser;
+      if (user?.displayName === "Aahil Jawad") {
+        await setDoc(constitutionRef, { text: textarea.value });
+        alert("Constitution updated!");
+      } else {
+        alert("Only Aahil Jawad can update the constitution.");
+      }
+    }
+
+    onAuthStateChanged(auth, loadConstitution);
+  </script>
+
+</body>
+</html>
