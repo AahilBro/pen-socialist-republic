@@ -5,24 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Pen Socialist Republic</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    /* Slide-in animation */
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    #pen-name-section {
-      display: none;
-      animation: slideIn 0.6s ease forwards;
-    }
-  </style>
 </head>
 <body>
 
@@ -30,7 +12,6 @@
   <p>Log in below to enter the People's Chatroom.</p>
   <button onclick="login()">Login with Google</button>
 
-  <!-- Security question -->
   <div id="security-question" style="display:none;">
     <h2>Security Question</h2>
     <p>What's the first letter of the legal name of the communist pen founder?</p>
@@ -38,17 +19,17 @@
     <button onclick="checkAnswer()">Submit Answer</button>
   </div>
 
-  <!-- Pen Name input -->
-  <div id="pen-name-section">
-    <h2>Your Pen Name</h2>
-    <input type="text" id="pen-name-input" placeholder="Enter your Pen Name" />
-    <button onclick="submitPenName()">Enter</button>
+  <div id="pen-name-section" style="display:none;">
+    <h2>Enter your Pen Name</h2>
+    <input type="text" id="pen-name" placeholder="Enter your pen name" />
+    <button onclick="submitPenName()">Submit Pen Name</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
@@ -61,17 +42,23 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
     const auth = getAuth(app);
-    const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
+    const db = getFirestore(app);
 
-    let currentUser = null;
+    // Check if user is already logged in
+    if (localStorage.getItem("userPenName")) {
+      window.location.href = "home.html";  // If pen name exists, go to home
+    }
 
     window.login = function () {
       signInWithPopup(auth, provider)
         .then((result) => {
-          currentUser = result.user;
-          alert("Welcome, " + currentUser.displayName + "! ✊");
+          const user = result.user;
+          alert("Welcome, " + user.displayName + "! ✊");
+
+          // Show the security question after login
           document.getElementById("security-question").style.display = "block";
         })
         .catch((error) => {
@@ -79,34 +66,39 @@
         });
     };
 
+    // Function to check the answer to the security question
     window.checkAnswer = function () {
-      const answer = document.getElementById("security-answer").value.trim().toUpperCase();
-      if (answer === "A") {
-        const penNameSection = document.getElementById("pen-name-section");
-        penNameSection.style.display = "block";
-        penNameSection.style.animation = "slideIn 0.6s ease";
+      const answer = document.getElementById("security-answer").value.trim().toUpperCase(); // Make it case-insensitive
+
+      if (answer === "A") {  // First letter of "Aahil Jawad"
+        // If the answer is correct, show the pen name input
+        document.getElementById("security-question").style.display = "none";
+        document.getElementById("pen-name-section").style.display = "block";
       } else {
-        alert("Incorrect answer. Try again, comrade.");
+        alert("Incorrect answer. Please try again.");
       }
     };
 
+    // Function to submit the pen name
     window.submitPenName = async function () {
-      const penName = document.getElementById("pen-name-input").value.trim();
-      if (!penName) {
-        alert("Please enter a pen name.");
-        return;
-      }
+      const penName = document.getElementById("pen-name").value.trim();
 
-      try {
-        await setDoc(doc(db, "members", currentUser.uid), {
-          displayName: currentUser.displayName,
-          email: currentUser.email,
-          penName: penName,
-          uid: currentUser.uid
+      if (penName) {
+        const user = auth.currentUser;
+
+        // Save the pen name to Firestore
+        await setDoc(doc(db, "members", user.uid), {
+          displayName: user.displayName,
+          penName: penName
         });
+
+        // Save pen name to localStorage so user doesn't need to submit again
+        localStorage.setItem("userPenName", penName);
+
+        // Redirect to the home page
         window.location.href = "home.html";
-      } catch (error) {
-        alert("Failed to save pen name: " + error.message);
+      } else {
+        alert("Please enter a pen name.");
       }
     };
   </script>
