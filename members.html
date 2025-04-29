@@ -33,11 +33,13 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        membersList.innerHTML = "Please log in first.";
+        // User is not logged in, redirect to home.html (login page)
+        alert("You are not logged in. Please log in to view the members.");
+        window.location.href = "home.html";  // Redirect to home (login page)
         return;
       }
 
-      // Check if the user has already entered a pen name from localStorage
+      // Check if the user has already entered a pen name in localStorage
       const penName = localStorage.getItem("userPenName");
       if (!penName) {
         membersList.innerHTML = "Please enter a pen name first.";
