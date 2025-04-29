@@ -28,12 +28,14 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   margin-top: 40px;
+  box-shadow: 0 0 0 transparent;
 }
 
 button:hover {
-  background-color: #991717; /* Slightly darker red for hover effect */
+  background-color: #991717;
+  box-shadow: 0 0 12px 4px rgba(185, 28, 28, 0.6); /* Red glow effect */
 }
 
 /* Modern card-style layout for login */
@@ -86,12 +88,15 @@ nav button {
   padding: 12px 30px;
   font-size: 18px;
   border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 transparent;
 }
 
 nav button:hover {
   background-color: #b91c1c;
   color: white;
   border-color: #991717;
+  box-shadow: 0 0 10px 3px rgba(185, 28, 28, 0.5);
 }
 
 /* Dark mode support */
@@ -110,5 +115,6 @@ nav button:hover {
   nav button:hover {
     background-color: #991717;
     border-color: #991717;
+    box-shadow: 0 0 10px 4px rgba(255, 100, 100, 0.4);
   }
 }
