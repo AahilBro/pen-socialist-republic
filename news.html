@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News - The Pen Socialist Republic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="fade-in">
+  <h1>📰 Latest News</h1>
+  <div id="news-list">Loading news...</div>
+
+  <div id="admin-section" style="display: none;">
+    <h2>Add News</h2>
+    <input type="text" id="news-heading" placeholder="Heading" />
+    <input type="text" id="news-subheading" placeholder="Subheading" />
+    <input type="text" id="news-text" placeholder="News text" />
+    <button onclick="addNews()">➕ Post News</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
+      authDomain: "pen-socialist-republic.firebaseapp.com",
+      projectId: "pen-socialist-republic",
+      storageBucket: "pen-socialist-republic.appspot.com",
+      messagingSenderId: "750292729446",
+      appId: "1:750292729446:web:03b1ca4355c4b0b16737a7",
+      measurementId: "G-3QMLT1900F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const newsList = document.getElementById("news-list");
+    const adminSection = document.getElementById("admin-section");
+
+    let isAdmin = false;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        newsList.innerHTML = "Please log in to view news.";
+        return;
+      }
+
+      isAdmin = user.displayName === "Aahil Jawad";
+      if (isAdmin) {
+        adminSection.style.display = "block";
+      }
+
+      const snapshot = await getDocs(collection(db, "news"));
+      newsList.innerHTML = "";
+      snapshot.forEach(newsDoc => {
+        const data = newsDoc.data();
+        const div = document.createElement("div");
+        div.style.marginBottom = "20px";
+        div.innerHTML = `
+          <h2>${data.heading}</h2>
+          <h4>${data.subheading}</h4>
+          <p>${data.text}</p>
+        `;
+
+        if (isAdmin) {
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "✏️ Edit";
+          editBtn.onclick = async () => {
+            const newHeading = prompt("New heading:", data.heading);
+            const newSubheading = prompt("New subheading:", data.subheading);
+            const newText = prompt("New text:", data.text);
+            if (newHeading && newSubheading && newText) {
+              await updateDoc(doc(db, "news", newsDoc.id), {
+                heading: newHeading,
+                subheading: newSubheading,
+                text: newText
+              });
+              location.reload();
+            }
+          };
+          div.appendChild(editBtn);
+
+          const deleteBtn = document.createElement("button");
+          deleteBtn.textContent = "❌ Delete";
+          deleteBtn.style.marginLeft = "10px";
+          deleteBtn.onclick = async () => {
+            await deleteDoc(doc(db, "news", newsDoc.id));
+            alert("News deleted.");
+            location.reload();
+          };
+          div.appendChild(deleteBtn);
+        }
+
+        newsList.appendChild(div);
+      });
+    });
+
+    async function addNews() {
+      const heading = document.getElementById("news-heading").value;
+      const subheading = document.getElementById("news-subheading").value;
+      const text = document.getElementById("news-text").value;
+
+      if (!heading || !subheading || !text) {
+        alert("Please fill out all fields.");
+        return;
+      }
+
+      await addDoc(collection(db, "news"), {
+        heading,
+        subheading,
+        text
+      });
+
+      alert("News posted!");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
