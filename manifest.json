@@ -1,0 +1,9 @@
+{
+  "name": "The Pen Socialist Republic",
+  "short_name": "Pen Socialist",
+  "description": "Join the People's Chatroom and make your mark in the Pen Socialist Republic.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#b91c1c"
+}
