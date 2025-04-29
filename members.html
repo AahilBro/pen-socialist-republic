@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Members - Pen Socialist Republic</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>📜 Members of the Republic</h1>
+  <p>These are the comrades who have joined our cause.</p>
+
+  <ul id="member-list"></ul>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
+      authDomain: "pen-socialist-republic.firebaseapp.com",
+      projectId: "pen-socialist-republic",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const membersRef = collection(db, "members");
+
+    async function loadMembers() {
+      const snapshot = await getDocs(membersRef);
+      const list = document.getElementById("member-list");
+
+      snapshot.forEach(doc => {
+        const li = document.createElement("li");
+        li.textContent = doc.data().penName;
+        list.appendChild(li);
+      });
+    }
+
+    loadMembers();
+  </script>
+
+</body>
+</html>
