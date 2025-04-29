@@ -25,35 +25,11 @@
     <button onclick="submitPenName()">Submit Pen Name</button>
   </div>
 
-  <!-- Home Section with Navigation -->
-  <div id="home-section">
-    <nav>
-      <button onclick="showSection('news')">News</button>
-      <button onclick="showSection('members')">Members</button>
-      <button onclick="showSection('constitution')">Constitution</button>
-    </nav>
-  </div>
-
-  <!-- News Section -->
-  <div id="news-section" style="display:none;">
-    <h2>Latest News</h2>
-    <div id="news-list">Loading news...</div>
-
-    <!-- News Creation Form (Visible only for Aahil Jawad) -->
-    <div id="news-form-section" style="display:none;">
-      <h3>Create News</h3>
-      <input type="text" id="news-heading" placeholder="Enter News Heading" />
-      <input type="text" id="news-subheading" placeholder="Enter News Subheading" />
-      <textarea id="news-text" placeholder="Enter News Text" rows="4"></textarea>
-      <button onclick="submitNews()">Submit News</button>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDocs, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
@@ -71,51 +47,11 @@
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    let isAdmin = false; // This will be set to true if the logged-in user is Aahil Jawad
+    // Check if user is already logged in
+    if (localStorage.getItem("userPenName")) {
+      window.location.href = "home.html";  // If pen name exists, go to home
+    }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        alert("Please log in.");
-        return;
-      }
-
-      const penName = localStorage.getItem("userPenName");
-      if (!penName) {
-        alert("Please enter your pen name.");
-        return;
-      }
-
-      // Check if the logged-in user is Aahil Jawad
-      isAdmin = user.displayName === "Aahil Jawad";
-
-      if (isAdmin) {
-        document.getElementById("news-form-section").style.display = "block";
-      }
-
-      // Fetch and display news
-      const newsList = document.getElementById("news-list");
-      const newsSnapshot = await getDocs(collection(db, "news"));
-      newsList.innerHTML = ""; // Clear loading text
-
-      if (newsSnapshot.empty) {
-        newsList.innerHTML = "No news available.";
-        return;
-      }
-
-      newsSnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <h3>${data.heading}</h3>
-          <h4>${data.subheading}</h4>
-          <p>${data.text}</p>
-          <hr />
-        `;
-        newsList.appendChild(div);
-      });
-    });
-
-    // Login function
     window.login = function () {
       signInWithPopup(auth, provider)
         .then((result) => {
@@ -130,36 +66,40 @@
         });
     };
 
-    // Submit news
-    window.submitNews = async function () {
-      const heading = document.getElementById("news-heading").value.trim();
-      const subheading = document.getElementById("news-subheading").value.trim();
-      const text = document.getElementById("news-text").value.trim();
+    // Function to check the answer to the security question
+    window.checkAnswer = function () {
+      const answer = document.getElementById("security-answer").value.trim().toUpperCase(); // Make it case-insensitive
 
-      if (!heading || !subheading || !text) {
-        alert("Please fill in all fields.");
-        return;
+      if (answer === "A") {  // First letter of "Aahil Jawad"
+        // If the answer is correct, show the pen name input
+        document.getElementById("security-question").style.display = "none";
+        document.getElementById("pen-name-section").style.display = "block";
+      } else {
+        alert("Incorrect answer. Please try again.");
       }
-
-      // Save the news to Firestore
-      await addDoc(collection(db, "news"), {
-        heading: heading,
-        subheading: subheading,
-        text: text,
-        createdAt: new Date(),
-      });
-
-      alert("News submitted successfully.");
-      location.reload(); // Reload the page to show the new news
     };
 
-    // Function to show the correct section based on button clicked
-    window.showSection = function (section) {
-      const sections = ["news", "members", "constitution"];
-      sections.forEach((sec) => {
-        document.getElementById(`${sec}-section`).style.display = "none";
-      });
-      document.getElementById(`${section}-section`).style.display = "block";
+    // Function to submit the pen name
+    window.submitPenName = async function () {
+      const penName = document.getElementById("pen-name").value.trim();
+
+      if (penName) {
+        const user = auth.currentUser;
+
+        // Save the pen name to Firestore
+        await setDoc(doc(db, "members", user.uid), {
+          displayName: user.displayName,
+          penName: penName
+        });
+
+        // Save pen name to localStorage so user doesn't need to submit again
+        localStorage.setItem("userPenName", penName);
+
+        // Redirect to the home page
+        window.location.href = "home.html";
+      } else {
+        alert("Please enter a pen name.");
+      }
     };
   </script>
 
