@@ -33,13 +33,11 @@
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // User is not logged in, redirect to home.html (login page)
-        alert("You are not logged in. Please log in to view the members.");
-        window.location.href = "home.html";  // Redirect to home (login page)
+        membersList.innerHTML = "Please log in first.";
         return;
       }
 
-      // Check if the user has already entered a pen name in localStorage
+      // Check if the user has already entered a pen name from localStorage
       const penName = localStorage.getItem("userPenName");
       if (!penName) {
         membersList.innerHTML = "Please enter a pen name first.";
@@ -60,7 +58,7 @@
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         const div = document.createElement("div");
-        div.innerHTML = `<strong>${data.penName}</strong>`;  <!-- Updated line -->
+        div.innerHTML = `<strong>${data.penName}</strong> (${data.displayName})`;
 
         if (isAdmin) {
           const deleteBtn = document.createElement("button");
@@ -78,5 +76,8 @@
       });
     });
   </script>
+</body>
+</html>
+
 </body>
 </html>
