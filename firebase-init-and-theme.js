@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// Your Firebase config
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
   authDomain: "pen-socialist-republic.firebaseapp.com",
@@ -19,41 +19,47 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Auth state
+// Log Firebase initialization to verify it's working
+console.log("Firebase initialized");
+
+// Load Era data AFTER login
 onAuthStateChanged(auth, async (user) => {
+  console.log("User state changed:", user);
+
   if (!user) {
-    window.location.href = "index.html"; // 🔒 Redirect if not signed in
-    return;
+    console.log("No user logged in");
+    return; // If no user is logged in, stop here.
   }
 
-  try {
-    const eraRef = doc(db, "eras", "eras");
-    const docSnap = await getDoc(eraRef);
+  console.log("User logged in:", user.displayName);
 
-    if (docSnap.exists()) {
-      const eraData = docSnap.data();
+  // Reference to the Firestore document where era data is stored
+  const eraRef = doc(db, "eras", "eras");
+  const docSnap = await getDoc(eraRef);
 
-      // Set era name
-      const eraNameElement = document.getElementById("eraNameDisplay");
-      if (eraNameElement) {
-        eraNameElement.textContent = eraData.eraName || "Unnamed Era";
-      }
+  if (docSnap.exists()) {
+    const eraData = docSnap.data();
+    console.log("Era data fetched:", eraData);
 
-      // Apply theme
-      document.documentElement.style.setProperty('--primary-color', eraData.primaryColor || "#b91c1c");
-      document.documentElement.style.setProperty('--background-color', eraData.backgroundColor || "#fffafa");
-
-      // Show admin section if the user is the era admin
-      if (user.displayName === eraData.eraAdmin || user.displayName === "Aahil Jawad") {
-        const adminSection = document.getElementById("adminSection");
-        if (adminSection) {
-          adminSection.style.display = "block";
-        }
-      }
-    } else {
-      console.log("❌ No such era document found!");
+    // Set era name in the UI
+    const eraNameElement = document.getElementById("eraNameDisplay");
+    if (eraNameElement) {
+      eraNameElement.textContent = eraData.eraName;
     }
-  } catch (error) {
-    console.error("🔥 Error loading era data:", error);
+
+    // Apply theme
+    document.documentElement.style.setProperty('--primary-color', eraData.primaryColor || "#b91c1c");
+    document.documentElement.style.setProperty('--background-color', eraData.backgroundColor || "#fffafa");
+
+    // Show admin section if user is the era admin
+    if (user.displayName === eraData.eraAdmin) {
+      console.log("User is the era admin");
+      const adminSection = document.getElementById("adminSection");
+      if (adminSection) {
+        adminSection.style.display = "block";
+      }
+    }
+  } else {
+    console.log("No such era document!");
   }
 });
