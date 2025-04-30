@@ -1,31 +1,44 @@
+// Import Firebase modules
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// Initialize Firestore
-const db = getFirestore();
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
+  authDomain: "pen-socialist-republic.firebaseapp.com",
+  projectId: "pen-socialist-republic",
+  storageBucket: "pen-socialist-republic.firebasestorage.app",
+  messagingSenderId: "750292729446",
+  appId: "1:750292729446:web:03b1ca4355c4b0b16737a7",
+  measurementId: "G-3QMLT1900F"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 // Fetch the era data from Firestore
 async function getEraData() {
-  const eraRef = doc(db, "eras", "eras");  // The document ID is "eras"
+  const eraRef = doc(db, "eras", "eras"); // The document ID is "eras"
   const docSnap = await getDoc(eraRef);
 
   if (docSnap.exists()) {
     const eraData = docSnap.data();
     console.log("Era Data: ", eraData);
 
-    // Example: Display the era name
+    // Show era name on the page if element exists
     const eraNameElement = document.getElementById("eraNameDisplay");
     if (eraNameElement) {
       eraNameElement.textContent = eraData.eraName;
     }
 
-    // Apply the theme colors to the website
-    document.documentElement.style.setProperty('--primary-color', eraData.primaryColor || "#b91c1c");  // Fallback to red if not set
-    document.documentElement.style.setProperty('--background-color', eraData.backgroundColor || "#fffafa");  // Fallback to light background if not set
+    // Apply theme colors
+    document.documentElement.style.setProperty('--primary-color', eraData.primaryColor || "#b91c1c");
+    document.documentElement.style.setProperty('--background-color', eraData.backgroundColor || "#fffafa");
 
-    // Optionally, check if the logged-in user is the era admin
-    const currentUserDisplayName = "Aahil Jawad";  // This would come from the logged-in user
+    // Show admin section if logged-in user is era admin
+    const currentUserDisplayName = "Aahil Jawad"; // Replace with dynamic user info later
     if (currentUserDisplayName === eraData.eraAdmin) {
-      // Show admin features if the current user is the era admin
       const adminSection = document.getElementById("adminSection");
       if (adminSection) {
         adminSection.style.display = "block";
@@ -36,5 +49,5 @@ async function getEraData() {
   }
 }
 
-// Call the function to load the era data
+// Load the era data
 getEraData();
