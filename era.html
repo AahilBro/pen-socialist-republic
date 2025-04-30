@@ -6,6 +6,27 @@
   <title>Era Settings</title>
   <link rel="stylesheet" href="style.css" />
   <script type="module" src="/era.js" defer></script>
+  <style>
+    :root {
+      --primary-color: #b91c1c;
+      --background-color: #fffafa;
+    }
+
+    body {
+      background-color: var(--background-color);
+      color: var(--primary-color);
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      transition: background-color 0.5s ease;
+    }
+
+    button:hover {
+      box-shadow: 0 0 15px var(--primary-color);
+    }
+  </style>
 </head>
 <body>
 
@@ -28,6 +49,19 @@
 
     <button id="submitEra">Set New Era</button>
   </section>
+
+  <script>
+    document.getElementById("submitEra").addEventListener("click", () => {
+      const primary = document.getElementById("primaryColor").value;
+      const bg = document.getElementById("bgColor").value;
+
+      document.documentElement.style.setProperty('--primary-color', primary);
+      document.documentElement.style.setProperty('--background-color', bg);
+
+      // You would also save these to Firestore here
+      alert("Era theme updated!");
+    });
+  </script>
 
 </body>
 </html>
