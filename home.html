@@ -6,18 +6,29 @@
   <title>Welcome to the Pen Socialist Republic</title>
   <link rel="stylesheet" href="style.css" />
   <script type="module" src="era.js" defer></script> <!-- Load dynamic theme -->
+  <script type="module" src="loadEraData.js" defer></script> <!-- New script to load era -->
 </head>
 <body>
 
   <h1 class="fade-in">🚩 Welcome to the Republic!</h1>
   <p class="fade-in">Select a page below to continue:</p>
 
+  <!-- 🔥 Era Info -->
+  <p class="fade-in"><strong>Current Era:</strong> <span id="eraNameDisplay">Loading...</span></p>
+
   <nav class="fade-in">
     <button onclick="goToPage('members.html')">📜 Members</button>
     <button onclick="goToPage('news.html')">📰 News</button>
     <button onclick="goToPage('constitution.html')">📘 Constitution</button>
-    <button onclick="goToPage('era.html')">🎨 Era</button> <!-- New Era Button -->
+    <button onclick="goToPage('era.html')">🎨 Era</button>
   </nav>
+
+  <!-- 🔒 Admin Section (only visible to era admin or Aahil Jawad) -->
+  <div id="adminSection" style="display: none; margin-top: 20px;">
+    <h3>⚙️ Admin Features</h3>
+    <p>You are the current Era Admin!</p>
+    <!-- You can add more admin buttons here -->
+  </div>
 
   <script>
     function goToPage(page) {
