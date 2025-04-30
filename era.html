@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Era Settings</title>
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="/era.js" defer></script>
+</head>
+<body>
+
+  <h1 class="fade-in">🎨 Era Settings</h1>
+  <p class="fade-in">Set the new era name, admin, and website colors.</p>
+
+  <section id="era-form" class="fade-in">
+    <input type="text" id="eraName" placeholder="Era Name" required />
+
+    <select id="eraAdmin" required>
+      <option value="">Select Era Admin</option>
+      <!-- JS will populate this from Firestore -->
+    </select>
+
+    <label>Primary Color:</label>
+    <input type="color" id="primaryColor" value="#b91c1c" />
+
+    <label>Background Color:</label>
+    <input type="color" id="bgColor" value="#fffafa" />
+
+    <button id="submitEra">Set New Era</button>
+  </section>
+
+</body>
+</html>
