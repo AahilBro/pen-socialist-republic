@@ -10,14 +10,16 @@
 
   <h1>📘 The Constitution</h1>
   <textarea id="constitution" rows="10" cols="50" placeholder="Write the glorious law here..."></textarea><br>
-  <!-- Corrected the function name to saveConstitution -->
-  <button onclick="saveConstitution()">Save</button>
+  <button id="saveButton">Save</button>
 
+  <!-- Script is placed at the end of the body -->
   <script type="module">
+    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
       authDomain: "pen-socialist-republic.firebaseapp.com",
@@ -32,20 +34,26 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
 
+    // References to Firestore document and textarea
     const constitutionRef = doc(db, "pen-socialist-republic", "constitution");
     const textarea = document.getElementById("constitution");
+    const saveButton = document.getElementById("saveButton");
 
-    // Function to load the constitution text
+    // Load the constitution on page load
     async function loadConstitution() {
-      const snap = await getDoc(constitutionRef);
-      if (snap.exists()) {
-        textarea.value = snap.data().text || "";
-      } else {
-        console.log("No constitution found!");
+      try {
+        const snap = await getDoc(constitutionRef);
+        if (snap.exists()) {
+          textarea.value = snap.data().text || "";
+        } else {
+          console.log("No constitution found!");
+        }
+      } catch (error) {
+        console.error("Error loading constitution:", error);
       }
     }
 
-    // Function to save the constitution text
+    // Save the constitution when clicked
     async function saveConstitution() {
       const user = auth.currentUser;
       if (user?.displayName === "Aahil Jawad") {
@@ -61,17 +69,20 @@
       }
     }
 
-    // Listen for authentication state changes and load the constitution
+    // Check if user is logged in, then load the constitution
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        loadConstitution(); // Load the constitution when the user is logged in
+        loadConstitution(); // Load constitution on successful login
       } else {
         console.log("User not logged in");
       }
     });
+
+    // Add event listener to the save button
+    saveButton.addEventListener("click", saveConstitution);
+
   </script>
 
 </body>
 </html>
-
 
