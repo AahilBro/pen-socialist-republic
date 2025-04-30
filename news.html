@@ -42,6 +42,26 @@
 
     let isAdmin = false;
 
+    // Fetch and apply era theme colors
+    async function loadEraTheme() {
+      const eraRef = doc(db, "eraSettings", "currentEra");
+      const eraSnap = await getDoc(eraRef);
+
+      if (eraSnap.exists()) {
+        const eraData = eraSnap.data();
+        const primaryColor = eraData.primaryColor || "#b91c1c";  // Default red
+        const backgroundColor = eraData.bgColor || "#fffafa";  // Default light color
+
+        // Apply the theme to the page's background and text
+        document.body.style.backgroundColor = backgroundColor;
+        document.body.style.color = primaryColor;
+      }
+    }
+
+    // Call the function to load the era theme on page load
+    loadEraTheme();
+
+    // Listen for auth state changes
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         newsList.innerHTML = "Please log in to view news.";
@@ -98,6 +118,7 @@
       });
     });
 
+    // Add new news post to Firestore
     async function addNews() {
       const heading = document.getElementById("news-heading").value;
       const subheading = document.getElementById("news-subheading").value;
