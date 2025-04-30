@@ -10,8 +10,10 @@
 
   <h1>🚩 The Pen Socialist Republic</h1>
   <p>Log in below to enter the People's Chatroom.</p>
+
   <button onclick="login()">Login with Google</button>
 
+  <!-- Security Question Section -->
   <div id="security-question" style="display:none;">
     <h2>Security Question</h2>
     <p>What's the first letter of the legal name of the communist pen founder?</p>
@@ -19,6 +21,7 @@
     <button onclick="checkAnswer()">Submit Answer</button>
   </div>
 
+  <!-- Pen Name Section -->
   <div id="pen-name-section" style="display:none;">
     <h2>Enter your Pen Name</h2>
     <input type="text" id="pen-name" placeholder="Enter your pen name" />
@@ -31,6 +34,7 @@
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
       authDomain: "pen-socialist-republic.firebaseapp.com",
@@ -46,6 +50,25 @@
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
+
+    // Fetch the current era theme from Firestore and apply it
+    async function loadEraTheme() {
+      const eraRef = doc(db, "eraSettings", "currentEra");
+      const eraSnap = await getDoc(eraRef);
+
+      if (eraSnap.exists()) {
+        const eraData = eraSnap.data();
+        const primaryColor = eraData.primaryColor || "#b91c1c";
+        const backgroundColor = eraData.bgColor || "#fffafa";
+
+        // Update the body's background and text color based on the era's theme
+        document.body.style.backgroundColor = backgroundColor;
+        document.body.style.color = primaryColor;
+      }
+    }
+
+    // Call to load era theme when page loads
+    loadEraTheme();
 
     // Check if user is already logged in
     if (localStorage.getItem("userPenName")) {
