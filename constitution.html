@@ -21,11 +21,12 @@
       apiKey: "AIzaSyAgorBeG4rQd0Uq3lglKAHCzEb4D7yhcF4",
       authDomain: "pen-socialist-republic.firebaseapp.com",
       projectId: "pen-socialist-republic",
-        storageBucket: "pen-socialist-republic.firebasestorage.app",
-            messagingSenderId: "750292729446",
-            appId: "1:750292729446:web:03b1ca4355c4b0b16737a7"
+      storageBucket: "pen-socialist-republic.firebasestorage.app",
+      messagingSenderId: "750292729446",
+      appId: "1:750292729446:web:03b1ca4355c4b0b16737a7"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -33,26 +34,43 @@
     const constitutionRef = doc(db, "pen-socialist-republic", "constitution");
     const textarea = document.getElementById("constitution");
 
+    // Function to load the constitution text
     async function loadConstitution() {
       const snap = await getDoc(constitutionRef);
       if (snap.exists()) {
         textarea.value = snap.data().text || "";
+      } else {
+        console.log("No constitution found!");
       }
     }
 
+    // Function to save the constitution text
     async function saveConstitution() {
       const user = auth.currentUser;
       if (user?.displayName === "Aahil Jawad") {
-        await setDoc(constitutionRef, { text: textarea.value });
-        alert("Constitution updated!");
+        try {
+          await setDoc(constitutionRef, { text: textarea.value });
+          alert("Constitution updated!");
+        } catch (error) {
+          console.error("Error saving constitution:", error);
+          alert("Failed to save constitution. Try again later.");
+        }
       } else {
         alert("Only Aahil Jawad can update the constitution.");
       }
     }
 
-    onAuthStateChanged(auth, loadConstitution);
+    // Listen for authentication state changes and load the constitution
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadConstitution(); // Load the constitution when the user is logged in
+      } else {
+        console.log("User not logged in");
+      }
+    });
   </script>
 
 </body>
 </html>
+
 
